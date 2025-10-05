@@ -1,0 +1,28 @@
+package com.mahbub.admobwithkmp.AdMob
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+
+@Composable
+actual fun AdMobBanner(modifier: Modifier) {
+    AndroidView(
+        modifier = modifier.fillMaxWidth(),
+        factory = { context ->
+            AdView(context).apply {
+                // Use adaptive banner size based on the available width
+                val displayMetrics = context.resources.displayMetrics
+                val adWidthDp = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+                setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidthDp))
+                // Official AdMob test banner ad unit ID
+                adUnitId = "ca-app-pub-3940256099942544/6300978111"
+                loadAd(AdRequest.Builder().build())
+            }
+        }
+    )
+}

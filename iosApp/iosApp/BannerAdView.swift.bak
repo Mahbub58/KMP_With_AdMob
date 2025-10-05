@@ -1,0 +1,44 @@
+import Foundation
+import SwiftUI
+import GoogleMobileAds
+import UIKit
+
+struct BannerAdView: UIViewRepresentable {
+    func makeUIView(context: Context) -> GADBannerView {
+        let bannerView = GADBannerView(adSize: GADAdSizeBanner)
+        bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716" // Test ad unit ID
+        
+        // Set the root view controller
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            bannerView.rootViewController = window.rootViewController
+        }
+        
+        // Set the delegate
+        bannerView.delegate = context.coordinator
+        
+        // Load the ad
+        let request = GADRequest()
+        bannerView.load(request)
+        
+        return bannerView
+    }
+    
+    func updateUIView(_ uiView: GADBannerView, context: Context) {
+        // No updates needed
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator: NSObject, GADBannerViewDelegate {
+        func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
+            print("Banner ad loaded successfully")
+        }
+        
+        func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
+            print("Banner ad failed to load: \(error.localizedDescription)")
+        }
+    }
+}
