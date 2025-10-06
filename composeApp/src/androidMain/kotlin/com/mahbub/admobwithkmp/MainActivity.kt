@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.ads.MobileAds
 import com.mahbub.admobwithkmp.AdMob.AndroidActivityHolder
+import com.mahbub.admobwithkmp.AdMob.ConsentManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         // Initialize Google Mobile Ads SDK
-        MobileAds.initialize(this)
+        ConsentManager(this){
+            MobileAds.initialize(this)
+        }
         AndroidActivityHolder.current = this
 
         setContent {

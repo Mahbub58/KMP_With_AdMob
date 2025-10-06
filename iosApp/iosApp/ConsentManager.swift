@@ -8,10 +8,11 @@ class ConsentManager: ObservableObject {
     
     func gatherConsent() {
         let parameters = RequestParameters()
-        
+
         // For testing purposes, you can force a UMPDebugGeography of EEA or not EEA.
         let debugSettings = DebugSettings()
-        // debugSettings.geography = UMPDebugGeography.EEA
+        debugSettings.testDeviceIdentifiers = ["TEST-DEVICE-HASHED-ID"]
+        debugSettings.geography = .EEA
         parameters.debugSettings = debugSettings
         
         // Requesting an update to consent information should be called on every app launch.
