@@ -1,21 +1,83 @@
 # AdMobWithKMP
 
-Kotlin Multiplatform Mobile project integrating Google AdMob on Android (Jetpack Compose) and iOS (SwiftUI). The iOS side also includes Google User Messaging Platform (UMP) for consent. Use it as a template to add banner, inline adaptive banner, interstitial, and rewarded ads while keeping platform-specific code in their own modules.
+Kotlin Multiplatform Mobile project integrating Google AdMob on Android (Jetpack Compose) and iOS (SwiftUI). iOS also includes Google User Messaging Platform (UMP) for consent. Use this template to add banner, inline adaptive banner, interstitial, and rewarded ads while keeping platform-specific code separated and shared UI/state in `commonMain`.
 
-## Android Project Structure
+## Table of Contents
+- Overview
+- Features
+- Dependencies
+- Project Structure
+  - Common (KMP)
+  - Android
+  - iOS
+  - Full Tree
+- Technical Process
+- Flowchart
+- Shared Architecture (commonMain)
+- Android Implementation
+- iOS Implementation
+- Setup (Android/iOS)
+- Integration Checklist
+- Build & Commands
+- Notes & Pitfalls
+- Contributing
+- License
+- Acknowledgements
+
+## Overview
+- Multiplatform app with shared UI/state in `commonMain`.
+- Android uses `play-services-ads`; iOS uses `Google-Mobile-Ads-SDK` + `GoogleUserMessagingPlatform`.
+- Consent requested on iOS before loading personalized ads; test ad units used during development.
+
+## Features
+- Banner and Inline Adaptive Banner (SwiftUI)
+- Interstitial and Rewarded (Swift managers)
+- Android AdMob integration using Play Services Ads
+- iOS consent with UMP prior to loading ads
+- Shared KMP UI/state in `commonMain`
+
+## Dependencies
+- Kotlin/Compose
+  - Compose Multiplatform: `1.9.0`
+  - Kotlin: `2.2.20`
+  - Android Gradle Plugin: `8.11.2`
+- Android
+  - `com.google.android.gms:play-services-ads:24.6.0`
+  - AndroidX Activity Compose, Lifecycle Compose, Material3 (via Compose)
+  - compileSdk: `36`, targetSdk: `36`, minSdk: `24`
+- iOS (CocoaPods)
+  - `Google-Mobile-Ads-SDK`
+  - `GoogleUserMessagingPlatform`
+  - Deployment target: iOS 13+
+
+## Project Structure
+
+### Common (KMP)
+```
+composeApp/src/
+├── commonMain/
+│   ├── kotlin/…                # Shared Compose UI/state, view models, contracts
+│   └── composeResources/
+│       └── drawable/…          # Shared resources (Compose Multiplatform)
+└── iosMain/
+    └── kotlin/…                # iOS interop stubs (if needed)
+```
+
+### Android
+```
 composeApp/
-├── build.gradle.kts
-└── src/
-    ├── commonMain/                 # Shared Compose UI/state
-    │   └── kotlin/…
-    ├── androidMain/                # Android-specific code
-    │   ├── AndroidManifest.xml     # Add AdMob App ID meta-data
-    │   └── kotlin/…                # Ad loaders, UI wrappers
-    └── iosMain/                    # iOS interop stubs (for KMP)
+├── build.gradle.kts            # KMP + Android application module
+└── src/androidMain/
+    ├── AndroidManifest.xml     # Add AdMob App ID meta-data
+    ├── kotlin/…                # Android-specific ad code (wrappers, setup)
+    └── res/
+        ├── drawable/…
+        ├── mipmap-*/…
+        └── values/…           # Android resources
+```
 
-
-## iOS Project Structure
-
+### iOS
+```
 iosApp/
 ├── Podfile                         # Google-Mobile-Ads-SDK + UMP
 ├── iosApp/
@@ -32,26 +94,7 @@ iosApp/
 └── iosApp.xcworkspace
 ```
 
-## Dependencies (Highlighted)
-- Kotlin/Compose:
-  - Compose Multiplatform: `1.9.0`
-  - Kotlin: `2.2.20`
-  - Android Gradle Plugin: `8.11.2`
-- Android:
-  - `com.google.android.gms:play-services-ads:24.6.0`
-  - AndroidX Activity Compose, Lifecycle Compose, Material3 (via Compose)
-- iOS (CocoaPods):
-  - `Google-Mobile-Ads-SDK`
-  - `GoogleUserMessagingPlatform`
-
-## Features
-- Banner and Inline Adaptive Banner (SwiftUI)
-- Interstitial and Rewarded (Swift managers)
-- Android AdMob integration using Play Services Ads
-- iOS consent with UMP prior to loading ads
-- Shared KMP UI/state in `commonMain`
-
-## Full Project Structure (Common, Android, iOS)
+### Full Tree
 ```
 AdMobWithKMP/
 ├── build.gradle.kts
@@ -62,37 +105,33 @@ AdMobWithKMP/
 │       ├── gradle-wrapper.jar
 │       └── gradle-wrapper.properties
 ├── composeApp/
-│   ├── build.gradle.kts            # KMP + Android application module
+│   ├── build.gradle.kts
 │   └── src/
 │       ├── commonMain/
-│       │   ├── kotlin/
-│       │   │   └── com/…           # Shared Compose UI/state, view models, contracts
+│       │   ├── kotlin/…
 │       │   └── composeResources/
-│       │       └── drawable/…      # Shared resources (Compose Multiplatform)
+│       │       └── drawable/…
 │       ├── androidMain/
-│       │   ├── AndroidManifest.xml # App ID meta-data for AdMob (Android)
-│       │   ├── kotlin/
-│       │   │   └── com/…           # Android-specific code (ad wrappers, setup)
+│       │   ├── AndroidManifest.xml
+│       │   ├── kotlin/…
 │       │   └── res/
 │       │       ├── drawable/…
 │       │       ├── mipmap-*/…
-│       │       └── values/…        # Android resources
+│       │       └── values/…
 │       ├── commonTest/
-│       │   └── kotlin/
-│       │       └── com/…           # Shared tests
+│       │   └── kotlin/…
 │       └── iosMain/
-│           └── kotlin/
-│               └── com/…           # iOS interop stubs for KMP (if needed)
+│           └── kotlin/…
 ├── iosApp/
 │   ├── Configuration/
 │   │   └── Config.xcconfig         # Bundle ID/version templating
-│   ├── Podfile                     # Google-Mobile-Ads-SDK + UMP
+│   ├── Podfile
 │   ├── iosApp/
 │   │   ├── Assets.xcassets/…
-│   │   ├── iOSApp.swift            # App entry
-│   │   ├── Info.plist              # GADApplicationIdentifier + SKAdNetwork IDs
-│   │   ├── ContentView.swift       # Example SwiftUI view
-│   │   ├── BannerAdView.swift      # Banner view
+│   │   ├── iOSApp.swift
+│   │   ├── Info.plist
+│   │   ├── ContentView.swift
+│   │   ├── BannerAdView.swift
 │   │   ├── InlineAdaptiveBannerView.swift
 │   │   ├── InterstitialAdManager.swift
 │   │   ├── RewardedAdManager.swift
@@ -106,52 +145,52 @@ AdMobWithKMP/
 ## Technical Process
 1. App launches.
 2. iOS requests user consent via UMP (`ConsentManager`).
-3. Initialize the Ads SDK early:
+3. Initialize Ads SDK early:
    - Android: `MobileAds.initialize(context)`
    - iOS: `GADMobileAds.sharedInstance().start(completionHandler: nil)`
 4. Load ad units (banner/interstitial/rewarded) using test IDs during development.
 5. Display the ad when ready; handle callbacks for errors/reward events.
 
-### Flowchart
+## Flowchart
 ```
-+------------------+
+------------------+
 |    App Launch    |
-+---------+--------+
+---------+--------+
           |
           v
-+------------------+
+------------------+
 | iOS: Request UMP |
 | consent (if req) |
-+---------+--------+
+---------+--------+
           |
           v
-+-------------------------+
+-------------------------+
 | Initialize Ads SDK      |
 | Android/iOS             |
-+---------+---------------+
+---------+---------------+
           |
           v
-+-------------------------+
+-------------------------+
 | Load Ad (Banner/Inter/  |
 | Rewarded) with test IDs |
-+---------+---------------+
+---------+---------------+
           |
           v
-+-------------------------+
+-------------------------+
 | Show Ad / Update UI     |
-+---------+---------------+
+---------+---------------+
           |
           v
-+-------------------------+
+-------------------------+
 | Handle callbacks/errors |
-+-------------------------+
+-------------------------+
 ```
 
-## Ads from `commonMain` (Architecture)
-- Purpose: keep UI state and ad triggers in shared code, while delegating actual ad loading/showing to platform implementations.
-- Pattern: define shared interfaces in `commonMain`, and implement them on Android/iOS.
+## Shared Architecture (commonMain)
+- Goal: keep UI state and ad triggers in shared code; delegate actual load/show to platform implementations.
+- Pattern: define shared interfaces in `commonMain` and implement them on Android/iOS.
 
-Example shared contracts in `commonMain` (conceptual):
+Conceptual interfaces:
 ```kotlin
 // commonMain
 enum class AdType { Banner, Interstitial, Rewarded }
@@ -181,12 +220,7 @@ class AdViewModel(private val controller: AdController, private val events: AdEv
 }
 ```
 
-- Android and iOS provide platform `AdController` implementations wired to Google SDKs.
-- Shared UI can call `AdViewModel` methods and react to `AdEvents` to update the UI.
-
-This project keeps platform-specific loading/showing logic in Android (`androidMain`) and iOS (`iosApp/*.swift`), while shared UI/state live in `commonMain`.
-
-## Android Implementation Details
+## Android Implementation
 - Dependencies: `com.google.android.gms:play-services-ads:24.6.0` and Compose.
 - Manifest: add `com.google.android.gms.ads.APPLICATION_ID` meta-data.
 - Initialization: call `MobileAds.initialize(context)` once early.
@@ -238,18 +272,18 @@ fun loadRewarded(context: Context, adUnitId: String, onReady: (RewardedAd) -> Un
 }
 ```
 
-Tip: use test IDs during development:
+Test unit IDs (development):
 - Banner: `ca-app-pub-3940256099942544/6300978111`
 - Interstitial: `ca-app-pub-3940256099942544/1033173712`
 - Rewarded: `ca-app-pub-3940256099942544/5224354917`
 
-## iOS Implementation Details
+## iOS Implementation
 - Pods: `Google-Mobile-Ads-SDK`, `GoogleUserMessagingPlatform`.
-- Info.plist: set `GADApplicationIdentifier` (sample currently used in repo).
+- Info.plist: set `GADApplicationIdentifier` (sample App ID included; replace for production).
 - Initialization: `GADMobileAds.sharedInstance().start(completionHandler: nil)`.
 - Consent: request via `ConsentManager` (UMP) before loading personalized ads.
 
-Banner (SwiftUI) example (similar to `BannerAdView.swift`):
+Banner (SwiftUI) example:
 ```swift
 import SwiftUI
 import GoogleMobileAds
@@ -268,7 +302,7 @@ struct BannerAdView: UIViewRepresentable {
 }
 ```
 
-Interstitial (similar to `InterstitialAdManager.swift`):
+Interstitial:
 ```swift
 final class InterstitialAdManager: NSObject {
     private var ad: GADInterstitialAd?
@@ -285,7 +319,7 @@ final class InterstitialAdManager: NSObject {
 }
 ```
 
-Rewarded (similar to `RewardedAdManager.swift`):
+Rewarded:
 ```swift
 final class RewardedAdManager: NSObject {
     private var ad: GADRewardedAd?
@@ -304,7 +338,7 @@ final class RewardedAdManager: NSObject {
 }
 ```
 
-Consent (UMP) example (similar to `ConsentManager.swift`):
+Consent (UMP):
 ```swift
 import GoogleUserMessagingPlatform
 
@@ -317,19 +351,6 @@ final class ConsentManager {
     }
 }
 ```
-
-## Integration Checklist
-- Common
-  - Define shared contracts in `commonMain` (interfaces, events).
-  - Keep UI state and triggers in shared ViewModels.
-- Android
-  - Add App ID meta-data in manifest.
-  - Initialize Ads in `Application` or first `Activity`.
-  - Use Compose `AndroidView` for banners; load interstitial/rewarded as needed.
-- iOS
-  - Install pods and set `GADApplicationIdentifier` in Info.plist.
-  - Initialize Ads at app start; request UMP consent.
-  - Use SwiftUI wrappers/managers to load/show ads.
 
 ## Setup
 
@@ -363,7 +384,7 @@ final class ConsentManager {
 2. Open `iosApp.xcworkspace`.
 3. Set AdMob App ID in `iosApp/iosApp/Info.plist` under `GADApplicationIdentifier`.
    - Currently set to Google’s sample App ID: `ca-app-pub-3940256099942544~1458002511` (replace for production).
-4. Initialize Ads in app start:
+4. Initialize Ads at app start:
    ```swift
    import GoogleMobileAds
    GADMobileAds.sharedInstance().start(completionHandler: nil)
@@ -376,6 +397,19 @@ final class ConsentManager {
    }
    ```
 6. Run the `iosApp` scheme on a simulator/device.
+
+## Integration Checklist
+- Common
+  - Define shared contracts in `commonMain` (interfaces, events).
+  - Keep UI state and triggers in shared ViewModels.
+- Android
+  - Add App ID meta-data in manifest.
+  - Initialize Ads in `Application` or first `Activity`.
+  - Use Compose `AndroidView` for banners; load interstitial/rewarded as needed.
+- iOS
+  - Install pods and set `GADApplicationIdentifier` in Info.plist.
+  - Initialize Ads at app start; request UMP consent.
+  - Use SwiftUI wrappers/managers to load/show ads.
 
 ## Build & Commands
 - Android assemble: `./gradlew :composeApp:assembleDebug`
